@@ -6,6 +6,7 @@ class CustomRaisedButton extends StatelessWidget {
     this.color,
     this.borderRadius: 8.0,
     this.height: 50.0,
+    this.loading: false,
     this.onPressed,
   }) : assert(borderRadius != null);
 
@@ -13,6 +14,7 @@ class CustomRaisedButton extends StatelessWidget {
   final Color color;
   final double borderRadius;
   final double height;
+  final bool loading;
   final VoidCallback onPressed;
 
   @override
@@ -20,7 +22,9 @@ class CustomRaisedButton extends StatelessWidget {
     return SizedBox(
       height: height,
       child: RaisedButton(
-        child: child,
+        child: loading ? CircularProgressIndicator(
+          backgroundColor: Colors.white,
+        ) : child,
         color: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
