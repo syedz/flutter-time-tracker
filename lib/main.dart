@@ -11,6 +11,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // This is using version 1.4.0 of Provider
     return Provider<AuthBase>(
       child: MaterialApp(
         title: 'Time Tracker',
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         ),
         home: LandingPage(),
       ),
-      builder: (BuildContext context) => Auth(),
+      value: Auth(),
     );
   }
 }
