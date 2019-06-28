@@ -36,12 +36,12 @@ class Auth implements AuthBase {
   }
 
   Future<User> currentUser() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    FirebaseUser user = await _firebaseAuth.currentUser();
     return _userFromFirebase(user);
   }
 
   Future<User> signInAnonymously() async {
-    FirebaseUser user = await FirebaseAuth.instance.signInAnonymously();
+    FirebaseUser user = await _firebaseAuth.signInAnonymously();
     return _userFromFirebase(user);
   }
 
@@ -72,8 +72,7 @@ class Auth implements AuthBase {
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.idToken != null && googleAuth.accessToken != null) {
-        FirebaseUser user = await FirebaseAuth.instance
-            .signInWithCredential(GoogleAuthProvider.getCredential(
+        FirebaseUser user = await _firebaseAuth.signInWithCredential(GoogleAuthProvider.getCredential(
           idToken: googleAuth.idToken,
           accessToken: googleAuth.accessToken,
         ));
