@@ -22,10 +22,13 @@ class CustomRaisedButton extends StatelessWidget {
     return SizedBox(
       height: height,
       child: RaisedButton(
-        child: loading ? CircularProgressIndicator(
-          backgroundColor: Colors.white,
-        ) : child,
+        child: loading
+            ? CircularProgressIndicator(
+                backgroundColor: Colors.white,
+              )
+            : child,
         color: color,
+        disabledColor: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(borderRadius),

@@ -9,10 +9,13 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import 'package:time_tracker_flutter_course/app/sign_in/email_sign_in_bloc.dart';
 import 'package:time_tracker_flutter_course/common_widgets/form_submit_button.dart';
-import 'package:time_tracker_flutter_course/common_widgets/platform_alert_dialog.dart';
+import 'package:time_tracker_flutter_course/common_widgets/platform_exception_alert_dialog.dart';
+import 'package:time_tracker_flutter_course/services/auth.dart';
 
 import 'email_sign_in_model.dart';
 
@@ -20,8 +23,24 @@ import 'email_sign_in_model.dart';
 
 class EmailSignInFormBlocBased extends StatefulWidget {
   EmailSignInFormBlocBased({@required this.bloc});
-
   final EmailSignInBloc bloc;
+
+  /**
+   * Use a static create(context) method when creating widgets that require a bloc
+   * Used to be in the EmailSignInPage class, and was called _buildEmailSignInFormBlocBased()
+   */
+  static Widget create(BuildContext context) {
+    final AuthBase auth = Provider.of<AuthBase>(context);
+
+    // This is using version 1.4.0 of Provider
+    return StatefulProvider<EmailSignInBloc>(
+      valueBuilder: (context) => EmailSignInBloc(auth: auth),
+      child: Consumer<EmailSignInBloc>(
+        builder: (context, bloc) => EmailSignInFormBlocBased(bloc: bloc),
+      ),
+      onDispose: (context, bloc) => bloc.dispose(),
+    );
+  }
 
   @override
   _EmailSignInFormStatelessState createState() =>
@@ -34,15 +53,24 @@ class _EmailSignInFormStatelessState extends State<EmailSignInFormBlocBased> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
+  @override
+  void dispose() {
+    // print('dispose called');
+    _emailController.dispose();
+    _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
+
   Future<void> _submit() async {
     try {
       await widget.bloc.submit();
       Navigator.of(context).pop();
-    } catch (e) {
-      PlatformAlertDialog(
+    } on PlatformException catch (e) {
+      PlatformExceptionAlertDialog(
         title: 'Sign in failed',
-        content: e.toString(),
-        defaultActionText: 'OK',
+        exception: e,
       ).show(context);
     }
   }
