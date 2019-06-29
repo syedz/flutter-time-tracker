@@ -10,16 +10,17 @@ import 'package:time_tracker_flutter_course/app/sign_in/social_sign_in_button.da
 import 'package:time_tracker_flutter_course/common_widgets/platform_exception_alert_dialog.dart';
 import 'package:time_tracker_flutter_course/services/auth.dart';
 
-import 'sign_in_bloc.dart';
+import 'sign_in_manager.dart';
 
 class SignInPage extends StatelessWidget {
-  const SignInPage({Key key, @required this.bloc}) : super(key: key);
-  final SignInBloc bloc;
+  const SignInPage({
+    Key key,
+    @required this.manager,
+    @required this.isLoading,
+  }) : super(key: key);
+  final SignInManager manager;
+  final bool isLoading;
 
-  /**
-   * Use a static create(BuildContext context) method when creating widgets that require a bloc
-   * Used to be in the LandingPage class and was called _buildSignInPage()
-   */
   static Widget create(BuildContext context) {
     final auth = Provider.of<AuthBase>(context);
 
@@ -27,11 +28,25 @@ class SignInPage extends StatelessWidget {
      * Creating Provider and Consumer is common practice. 
      * Good alternative to calling Provider.of<T>
      * */
-    return Provider<SignInBloc>(
-      builder: (context) => SignInBloc(auth: auth), // Create bloc on the fly
-      dispose: (context, bloc) => bloc.dispose(),
-      child: Consumer<SignInBloc>(
-        builder: (context, bloc, _) => SignInPage(bloc: bloc),
+    return Provider<ValueNotifier<bool>>(
+      builder: (context) => ValueNotifier<bool>(false),
+      dispose: (context, valueNotifier) => valueNotifier.dispose(),
+      child: Consumer<ValueNotifier<bool>>(
+        builder: (context, valueNotifier, _) => Provider<SignInManager>(
+              builder: (context) => SignInManager(
+                    auth: auth,
+                    isLoading: valueNotifier,
+                  ),
+              child: Consumer<SignInManager>(
+                builder: (context, manager, _) => ValueListenableBuilder<bool>(
+                      valueListenable: valueNotifier,
+                      builder: (context, isLoading, _) => SignInPage(
+                            manager: manager,
+                            isLoading: isLoading,
+                          ),
+                    ),
+              ),
+            ),
       ),
     );
   }
@@ -45,7 +60,7 @@ class SignInPage extends StatelessWidget {
 
   Future<void> _signInAnonymously(BuildContext context) async {
     try {
-      await bloc.signInAnonymously();
+      await manager.signInAnonymously();
     } on PlatformException catch (e) {
       _showSignInError(context, e);
     }
@@ -53,7 +68,7 @@ class SignInPage extends StatelessWidget {
 
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
-      await bloc.signInWithGoogle();
+      await manager.signInWithGoogle();
     } on PlatformException catch (e) {
       if (e.code != 'ERROR_ABORTED_BY_USER') {
         _showSignInError(context, e);
@@ -63,7 +78,7 @@ class SignInPage extends StatelessWidget {
 
   Future<void> _signInWithFacebook(BuildContext context) async {
     try {
-      await bloc.signInWithFacebook();
+      await manager.signInWithFacebook();
     } on PlatformException catch (e) {
       if (e.code != 'ERROR_ABORTED_BY_USER') {
         _showSignInError(context, e);
@@ -87,25 +102,17 @@ class SignInPage extends StatelessWidget {
      * This avoids multiple calls like below, as it was replaced with bloc in constructor.
      */
     // final bloc = Provider.of<SignInBloc>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Time Tracker'),
         elevation: 2.0,
       ),
-      body: StreamBuilder<bool>(
-        stream: bloc.isLoadingStream,
-        initialData: false,
-        builder: (context, snapshot) {
-          // Called everytime there is a new value on the stream
-          return _buildContent(context, snapshot.data);
-        },
-      ),
+      body: _buildContent(context),
       backgroundColor: Colors.grey[200],
     );
   }
 
-  Widget _buildContent(BuildContext context, bool isLoading) {
+  Widget _buildContent(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(16.0),
       child: Column(
@@ -114,7 +121,7 @@ class SignInPage extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             height: 50.0,
-            child: _buildHeader(isLoading),
+            child: _buildHeader(),
           ),
           SizedBox(height: 48.0),
           SocialSignInButton(
@@ -160,7 +167,7 @@ class SignInPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(bool isLoading) {
+  Widget _buildHeader() {
     if (isLoading) {
       return Center(
         child: CircularProgressIndicator(),
