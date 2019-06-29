@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // This is using version 1.4.0 of Provider
     return Provider<AuthBase>(
+      builder: (context) => Auth(),
       child: MaterialApp(
         title: 'Time Tracker',
         theme: ThemeData(
@@ -20,7 +21,6 @@ class MyApp extends StatelessWidget {
         ),
         home: LandingPage(),
       ),
-      value: Auth(),
     );
   }
 }

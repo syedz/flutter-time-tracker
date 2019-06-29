@@ -17,18 +17,21 @@ class SignInPage extends StatelessWidget {
   final SignInBloc bloc;
 
   /**
-   * Use a static create(context) method when creating widgets that require a bloc
+   * Use a static create(BuildContext context) method when creating widgets that require a bloc
    * Used to be in the LandingPage class and was called _buildSignInPage()
    */
   static Widget create(BuildContext context) {
     final auth = Provider.of<AuthBase>(context);
-    final signInBloc = SignInBloc(auth: auth);
 
-    return StatefulProvider<SignInBloc>(
-      valueBuilder: (context) => signInBloc,
-      onDispose: (context, bloc) => bloc.dispose(),
-      child: SignInPage(
-        bloc: signInBloc,
+    /** 
+     * Creating Provider and Consumer is common practice. 
+     * Good alternative to calling Provider.of<T>
+     * */
+    return Provider<SignInBloc>(
+      builder: (context) => SignInBloc(auth: auth), // Create bloc on the fly
+      dispose: (context, bloc) => bloc.dispose(),
+      child: Consumer<SignInBloc>(
+        builder: (context, bloc, _) => SignInPage(bloc: bloc),
       ),
     );
   }
@@ -94,6 +97,7 @@ class SignInPage extends StatelessWidget {
         stream: bloc.isLoadingStream,
         initialData: false,
         builder: (context, snapshot) {
+          // Called everytime there is a new value on the stream
           return _buildContent(context, snapshot.data);
         },
       ),
