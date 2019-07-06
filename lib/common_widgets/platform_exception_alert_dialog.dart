@@ -13,6 +13,12 @@ class PlatformExceptionAlertDialog extends PlatformAlertDialog {
         );
 
   static String _message(PlatformException exception) {
+    // Below doesn't work, since error messages are more descriptive in Firestore, but the idea still stands
+    if (exception.message == 'PERMISSION_DENIED') {
+      if (exception.code == 'Error performing setData') {
+        return 'Missing or insufficent permissions';
+      }
+    }
     return _errors[exception.code] ?? exception.message;
   }
 
