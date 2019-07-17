@@ -5,7 +5,8 @@
 import 'package:meta/meta.dart';
 
 class Job {
-  Job({@required this.name, @required this.ratePerHour});
+  Job({@required this.id, @required this.name, @required this.ratePerHour});
+  final String id;
   final String name;
   final int ratePerHour;
 
@@ -14,7 +15,7 @@ class Job {
    * create a new instance of its class. Factory constructor might return an 
    * instance from a cache, or it might return an instance of a subtype.
    */
-  factory Job.fromMap(Map<String, dynamic> data) {
+  factory Job.fromMap(Map<String, dynamic> data, String documentId) {
     if (data == null) {
       return null;
     }
@@ -23,6 +24,7 @@ class Job {
     final int ratePerHour = data['ratePerHour'];
 
     return Job(
+      id: documentId,
       name: name,
       ratePerHour: ratePerHour,
     );

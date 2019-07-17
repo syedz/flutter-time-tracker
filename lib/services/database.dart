@@ -14,10 +14,12 @@ import 'package:time_tracker_flutter_course/services/firestore_service.dart';
 import 'api_path.dart';
 
 abstract class Database {
-  Future<void> createJob(Job job);
+  Future<void> setJob(Job job);
   // void readJobs();
   Stream<List<Job>> jobsStream();
 }
+
+String documentIdFromCurrentData() => DateTime.now().toIso8601String();
 
 class FirestoreDatabase implements Database {
   // assert() makes sure that uid is not null before setting
@@ -29,20 +31,20 @@ class FirestoreDatabase implements Database {
   /**
    * Moved all of the Firestore specific code to a separate class, so we  don't need
    * to worry about implementation in FirestoreDatabase class. Easier to create new
-   * methods to write data. Can copy/paste createJob() and adjust data type and API path
+   * methods to write data. Can copy/paste setJob() (used to be createJob()) and adjust data type and API path
    * as needed. Same thing for reading data from a different API path, copy/paste 
    * jobsStream(), adjust the type being returned, and change the API path.
    * 
    * Can new data types if needed by creating models and craeting fromMap() and toMap()
    */
-  Future<void> createJob(Job job) async => await _service.setData(
-        path: APIPath.job(uid, 'job_abc'),
+  Future<void> setJob(Job job) async => await _service.setData(
+        path: APIPath.job(uid, job.id),
         data: job.toMap(),
       );
 
   Stream<List<Job>> jobsStream() => _service.collectionStream(
         path: APIPath.jobs(uid),
-        builder: (data) => Job.fromMap(data),
+        builder: (data, documentId) => Job.fromMap(data, documentId),
       );
 
   /**
