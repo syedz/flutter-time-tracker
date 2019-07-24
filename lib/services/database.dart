@@ -16,6 +16,7 @@ import 'api_path.dart';
 abstract class Database {
   Future<void> setJob(Job job);
   // void readJobs();
+  Future<void> deleteJob(Job job);
   Stream<List<Job>> jobsStream();
 }
 
@@ -37,11 +38,18 @@ class FirestoreDatabase implements Database {
    * 
    * Can new data types if needed by creating models and craeting fromMap() and toMap()
    */
+  @override
   Future<void> setJob(Job job) async => await _service.setData(
         path: APIPath.job(uid, job.id),
         data: job.toMap(),
       );
 
+  @override
+  Future<void> deleteJob(Job job) async => await _service.deleteData(
+        path: APIPath.job(uid, job.id),
+      );
+
+  @override
   Stream<List<Job>> jobsStream() => _service.collectionStream(
         path: APIPath.jobs(uid),
         builder: (data, documentId) => Job.fromMap(data, documentId),

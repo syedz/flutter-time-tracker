@@ -47,6 +47,18 @@ class JobsPage extends StatelessWidget {
     }
   }
 
+  Future<void> _delete(BuildContext context, Job job) async {
+    try {
+      final database = Provider.of<Database>(context);
+      await database.deleteJob(job);
+    } on PlatformException catch (e) {
+      PlatformExceptionAlertDialog(
+        title: 'Operation failed',
+        exception: e,
+      ).show(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: This was a test to ensure that data was being returned from Firestore
@@ -86,9 +98,15 @@ class JobsPage extends StatelessWidget {
       builder: (context, snapshot) {
         return ListItemsBuilder<Job>(
           snapshot: snapshot,
-          itemBuilder: (context, job) => JobListTile(
-            job: job,
-            onTap: () => EditJobPage.show(context, job: job),
+          itemBuilder: (context, job) => Dismissible(
+            key: Key('job-${job.id}'),
+            background: Container(color: Colors.red),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) => _delete(context, job),
+            child: JobListTile(
+              job: job,
+              onTap: () => EditJobPage.show(context, job: job),
+            ),
           ),
         );
       },
