@@ -25,9 +25,11 @@ class EditJobPage extends StatefulWidget {
   final Job job;
 
   // Pushes new route into Navigation stack
-  static Future<void> show(BuildContext context, {Job job}) async {
-    final database = Provider.of<Database>(context);
-
+  static Future<void> show(
+    BuildContext context, {
+    Database database,
+    Job job,
+  }) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditJobPage(
@@ -87,7 +89,7 @@ class _EditJobPageState extends State<EditJobPage> {
             defaultActionText: 'OK',
           ).show(context);
         } else {
-          final id = widget.job?.id ?? documentIdFromCurrentData();
+          final id = widget.job?.id ?? documentIdFromCurrentDate();
           final job = Job(
             id: id,
             name: _name,
